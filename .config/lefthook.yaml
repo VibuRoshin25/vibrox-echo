@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+
+  commands:
+    goimports:
+      glob: "*.go"
+      run: goimports -w {staged_files} # Formats Go code and manages imports (adding missing ones and removing unused ones)
+
+    lint:
+      run: golangci-lint run # Runs the configured linters on the staged Go files to catch potential issues before committing
+
+    vulncheck:
+      run: govulncheck -show verbose ./... # Checks for known vulnerabilities in Go dependencies
+
+    fieldalignment:
+      run: go list ./... | grep -v "./proto/*" | xargs fieldalignment # Checks for struct field alignment issues to optimize memory usage, excluding generated code
