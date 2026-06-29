@@ -1,0 +1,64 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+output:
+  formats:
+    text:
+      print-linter-name: true
+      colors: true
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gocyclo
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - bodyclose
+    - nakedret
+    - tparallel
+    - gosec
+    - sqlclosecheck
+    - errchkjson
+    - copyloopvar
+    - contextcheck
+    - rowserrcheck
+    - noctx
+    - errorlint # proper error wrapping and comparisons
+    - prealloc # suggest slice preallocation
+    - predeclared # avoid shadowing builtins
+    - asciicheck # detect non-ASCII identifiers
+    - bidichk # Unicode bidi security
+    - nilerr # returning nil after an error
+    - nilnil # returning (nil, nil) unexpectedly
+    - usestdlibvars # use stdlib constants (http.MethodGet, etc.)
+    - wastedassign # assignments never read
+    - containedctx
+    - forcetypeassert
+
+  settings:
+    gosec:
+      severity: low
+
+    goconst:
+      ignore-tests: true
+
+    gocyclo:
+      min-complexity: 15
+
+    revive:
+      rules:
+        - name: exported
+        - name: indent-error-flow
+        - name: empty-block
+        - name: unnecessary-stmt
+        - name: unreachable-code
+        - name: superfluous-else
+          severity: warning

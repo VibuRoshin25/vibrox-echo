@@ -4,11 +4,14 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+
 	"vibrox-echo/proto/logger"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+const logDirPerm os.FileMode = 0o750
 
 var Logger *zap.Logger
 
@@ -18,7 +21,7 @@ func InitLogger() error {
 	logDir := filepath.Dir(logPath)
 
 	// Ensure the directory exists
-	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(logDir, logDirPerm); err != nil {
 		return err
 	}
 
@@ -28,7 +31,11 @@ func InitLogger() error {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				panic(err)
+			}
+		}()
 	}
 
 	cfg := zap.NewProductionConfig()
@@ -83,7 +90,9 @@ func (s *Server) Log(_ context.Context, req *logger.LogRequest) (*logger.LogResp
 		Logger.WithOptions(zap.AddCallerSkip(1)).Error(req.Message, zap.String("service", req.Service))
 	}
 
-	Logger.Sync()
+	if err := Logger.Sync(); err != nil {
+		return nil, err
+	}
 
 	return &logger.LogResponse{
 		Success: true,

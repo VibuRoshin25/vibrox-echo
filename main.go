@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
-	"vibrox-echo/proto/logger"
-
 	"google.golang.org/grpc"
+
+	"vibrox-echo/proto/logger"
 )
 
 type Server struct {
@@ -18,9 +19,14 @@ func main() {
 	if err := InitLogger(); err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	defer Logger.Sync()
+	defer func() {
+		if err := Logger.Sync(); err != nil {
+			panic(err)
+		}
+	}()
 
-	listen, err := net.Listen("tcp", ":9000")
+	lc := net.ListenConfig{}
+	listen, err := lc.Listen(context.Background(), "tcp", ":9000") // #nosec G102 -- Intentionally listening on all interfaces.
 	if err != nil {
 		log.Fatal("Failed to listen on Port 9000: ", err)
 	}
